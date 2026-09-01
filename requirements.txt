@@ -1,0 +1,15 @@
+# Django Framework & REST API
+Django>=5.0,<6.0
+djangorestframework>=3.14.0
+django-cors-headers>=4.3.0
+
+# Authentifizierung (JWT)
+djangorestframework-simplejwt>=5.3.0
+
+# Medienverarbeitung & KI
+yt-dlp>=2025.7.21
+openai-whisper
+google-genai
+
+# Umgebungsvariablen & Hilfsmittel
+python-dotenv>=1.0.0
