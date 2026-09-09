@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from datetime import timedelta
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -42,7 +43,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'authentication',
     'quizzes',
-    'rest_framework_simplejwt.token_blacklist',  
+    'rest_framework_simplejwt.token_blacklist',
+
 ]
 
 MIDDLEWARE = [
@@ -143,3 +145,6 @@ SIMPLE_JWT = {
     # Auf True setzen, sobald du HTTPS (im Live-Betrieb) nutzt
     'AUTH_COOKIE_SECURE': False,
 }
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
