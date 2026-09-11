@@ -12,7 +12,8 @@ class RegisterView(APIView):
 
         if serializer.is_valid():
             serializer.save()
-            return Response({"message": "Benutzer erfolgreich registriert."}, status=status.HTTP_201_CREATED)
+
+            return Response({"detail": "User created successfully!"}, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -51,7 +52,6 @@ class LoginView(APIView):
             )
             return response
         else:
-
             return Response(
                 {"detail": "Ungültige Anmeldedaten."},
                 status=status.HTTP_401_UNAUTHORIZED
@@ -61,11 +61,9 @@ class LoginView(APIView):
 class LogoutView(APIView):
     def post(self, request):
         try:
-
             refresh_token = request.COOKIES.get('refresh_token')
 
             if refresh_token:
-
                 token = RefreshToken(refresh_token)
                 token.blacklist()
 
@@ -78,3 +76,32 @@ class LogoutView(APIView):
 
         except Exception as e:
             return Response({"detail": "Fehler beim Logout."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CookieTokenRefreshView(APIView):
+    def post(self, request):
+        refresh_token = request.COOKIES.get('refresh_token')
+
+        if not refresh_token:
+            return Response({"detail": "Kein Refresh-Token gefunden."}, status=status.HTTP_401_UNAUTHORIZED)
+
+        try:
+
+            token = RefreshToken(refresh_token)
+            access_token = str(token.access_token)
+
+            response = Response(
+                {"message": "Token erfolgreich erneuert."}, status=status.HTTP_200_OK)
+
+            response.set_cookie(
+                key='access_token',
+                value=access_token,
+                httponly=True,
+                secure=False,
+                samesite='Lax',
+                max_age=3600
+            )
+            return response
+
+        except Exception:
+            return Response({"detail": "Ungültiger oder abgelaufener Refresh-Token."}, status=status.HTTP_401_UNAUTHORIZED)
