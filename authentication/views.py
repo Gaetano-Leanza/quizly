@@ -30,8 +30,16 @@ class LoginView(APIView):
             access_token = str(refresh.access_token)
             refresh_token = str(refresh)
 
-            response = Response(
-                {"message": "Erfolgreich eingeloggt."}, status=status.HTTP_200_OK)
+            response_data = {
+                "detail": "Login successfully!",
+                "user": {
+                    "id": user.id,
+                    "username": user.username,
+                    "email": user.email
+                }
+            }
+
+            response = Response(response_data, status=status.HTTP_200_OK)
 
             response.set_cookie(
                 key='access_token',
@@ -52,6 +60,7 @@ class LoginView(APIView):
             )
             return response
         else:
+
             return Response(
                 {"detail": "Ungültige Anmeldedaten."},
                 status=status.HTTP_401_UNAUTHORIZED
