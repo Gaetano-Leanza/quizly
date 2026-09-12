@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import RegisterSerializer
 from django.contrib.auth import authenticate
+from rest_framework.permissions import IsAuthenticated
 
 
 class RegisterView(APIView):
@@ -68,6 +69,9 @@ class LoginView(APIView):
 
 
 class LogoutView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
         try:
             refresh_token = request.COOKIES.get('refresh_token')
@@ -77,14 +81,20 @@ class LogoutView(APIView):
                 token.blacklist()
 
             response = Response(
-                {"message": "Erfolgreich abgemeldet."}, status=status.HTTP_200_OK)
+                {"detail": "Log-Out successfully! All Tokens will be deleted. Refresh token is now invalid."},
+                status=status.HTTP_200_OK
+            )
+
             response.delete_cookie('access_token')
             response.delete_cookie('refresh_token')
 
             return response
 
         except Exception as e:
-            return Response({"detail": "Fehler beim Logout."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "Interner Serverfehler beim Logout."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class CookieTokenRefreshView(APIView):
