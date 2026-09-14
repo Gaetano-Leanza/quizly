@@ -7,12 +7,13 @@ from .services import download_youtube_audio, transcribe_audio, generate_quiz_fr
 
 
 class QuizViewSet(viewsets.ModelViewSet):
-    queryset = Quiz.objects.all()
     serializer_class = QuizSerializer
     permission_classes = [IsAuthenticated]
 
-    def create(self, request, *args, **kwargs):
+    def get_queryset(self):
+        return Quiz.objects.filter(user=self.request.user)
 
+    def create(self, request, *args, **kwargs):
         youtube_url = request.data.get('url')
 
         if not youtube_url:
@@ -33,6 +34,7 @@ class QuizViewSet(viewsets.ModelViewSet):
         try:
 
             quiz = Quiz.objects.create(
+                user=request.user,
                 title="Neu generiertes KI-Quiz",
                 description="Automatisch generiertes Quiz aus YouTube-Video.",
                 video_url=youtube_url
@@ -53,7 +55,6 @@ class QuizViewSet(viewsets.ModelViewSet):
                     )
 
             serializer = self.get_serializer(quiz)
-
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         except Exception as e:
