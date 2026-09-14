@@ -1,4 +1,4 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, permissions
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .models import Quiz, Question, Answer
@@ -6,12 +6,25 @@ from .serializers import QuizSerializer
 from .services import download_youtube_audio, transcribe_audio, generate_quiz_from_text
 
 
+class IsOwner(permissions.BasePermission):
+    message = "Zugriff verweigert - Quiz gehört nicht dem Benutzer."
+
+    def has_object_permission(self, request, view, obj):
+
+        return obj.user == request.user
+
+
 class QuizViewSet(viewsets.ModelViewSet):
     serializer_class = QuizSerializer
-    permission_classes = [IsAuthenticated]
+
+    permission_classes = [IsAuthenticated, IsOwner]
 
     def get_queryset(self):
-        return Quiz.objects.filter(user=self.request.user)
+
+        if self.action == 'list':
+            return Quiz.objects.filter(user=self.request.user)
+
+        return Quiz.objects.all()
 
     def create(self, request, *args, **kwargs):
         youtube_url = request.data.get('url')
@@ -32,7 +45,6 @@ class QuizViewSet(viewsets.ModelViewSet):
             return Response({"detail": "Fehler bei der KI-Generierung."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         try:
-
             quiz = Quiz.objects.create(
                 user=request.user,
                 title="Neu generiertes KI-Quiz",
