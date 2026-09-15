@@ -111,11 +111,15 @@ class CookieTokenRefreshView(APIView):
 
 
 class LogoutView(APIView):
-    permission_classes = [AllowAny]
+
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
+
         response = Response(
-            {"detail": "Successfully logged out."}, status=status.HTTP_200_OK)
+            {"detail": "Log-Out successfully! All Tokens will be deleted. Refresh token is now invalid."},
+            status=status.HTTP_200_OK
+        )
 
         response.delete_cookie('access_token')
         response.delete_cookie('refresh_token')
