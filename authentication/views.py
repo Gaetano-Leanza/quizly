@@ -1,3 +1,4 @@
+from rest_framework.permissions import AllowAny
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -68,32 +69,55 @@ class LoginView(APIView):
             )
 
 
-class LogoutView(APIView):
-
-    permission_classes = [IsAuthenticated]
+class LoginView(APIView):
+    permission_classes = [AllowAny]
 
     def post(self, request):
-        try:
-            refresh_token = request.COOKIES.get('refresh_token')
+        username = request.data.get('username')
+        password = request.data.get('password')
 
-            if refresh_token:
-                token = RefreshToken(refresh_token)
-                token.blacklist()
+        user = authenticate(username=username, password=password)
 
-            response = Response(
-                {"detail": "Log-Out successfully! All Tokens will be deleted. Refresh token is now invalid."},
-                status=status.HTTP_200_OK
+        if user is not None:
+
+            refresh = RefreshToken.for_user(user)
+            access_token = str(refresh.access_token)
+            refresh_token = str(refresh)
+
+            response_data = {
+                "detail": "Login successfully!",
+                "user": {
+                    "id": user.id,
+                    "username": user.username,
+                    "email": user.email
+                }
+            }
+
+            response = Response(response_data, status=status.HTTP_200_OK)
+
+            response.set_cookie(
+                key='access_token',
+                value=access_token,
+                httponly=True,
+                secure=False,
+                samesite='Lax',
+                max_age=3600
+            )
+            response.set_cookie(
+                key='refresh_token',
+                value=refresh_token,
+                httponly=True,
+                secure=False,
+                samesite='Lax',
+                max_age=3600 * 24 * 7
             )
 
-            response.delete_cookie('access_token')
-            response.delete_cookie('refresh_token')
-
             return response
+        else:
 
-        except Exception as e:
             return Response(
-                {"detail": "Interner Serverfehler beim Logout."},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {"detail": "Ungültige Anmeldedaten."},
+                status=status.HTTP_401_UNAUTHORIZED
             )
 
 
