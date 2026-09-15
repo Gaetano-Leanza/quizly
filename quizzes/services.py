@@ -72,7 +72,7 @@ def generate_quiz_from_text(transcribed_text):
     if not transcribed_text:
         return None
 
-    model = genai.GenerativeModel('gemini-1.5-flash-latest')
+    model = genai.GenerativeModel('gemini-3.6-flash')
 
     prompt = f"""
     Erstelle basierend auf dem folgenden Text ein Quiz mit exakt 10 Fragen.
