@@ -1,8 +1,17 @@
+"""
+Database models for the Quizly app.
+Defines the structure for Quizzes, Questions, and Answers linked to users.
+"""
+
 from django.db import models
 from django.contrib.auth.models import User
 
 
 class Quiz(models.Model):
+    """
+    Represents a quiz created by a user, containing a YouTube video URL,
+    title, description, and timestamps.
+    """
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='quizzes')
     video_url = models.URLField()  
@@ -16,6 +25,9 @@ class Quiz(models.Model):
 
 
 class Question(models.Model):
+    """
+    Represents a question associated with a specific quiz.
+    """
     quiz = models.ForeignKey(
         Quiz, on_delete=models.CASCADE, related_name='questions')
     text = models.CharField(max_length=500)
@@ -25,6 +37,10 @@ class Question(models.Model):
 
 
 class Answer(models.Model):
+    """
+    Represents an answer option for a specific question, 
+    indicating whether it is the correct choice or not.
+    """
     question = models.ForeignKey(
         Question, on_delete=models.CASCADE, related_name='answers')
     text = models.CharField(max_length=255)

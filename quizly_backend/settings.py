@@ -139,10 +139,9 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-    'AUTH_COOKIE': 'access_token',  # Name unseres Cookies
+    'AUTH_COOKIE': 'access_token',  
     'AUTH_COOKIE_REFRESH': 'refresh_token',
-    'AUTH_COOKIE_HTTP_ONLY': True,  # Sehr wichtig für die Sicherheit
-    # Auf True setzen, sobald du HTTPS (im Live-Betrieb) nutzt
+    'AUTH_COOKIE_HTTP_ONLY': True,  
     'AUTH_COOKIE_SECURE': False,
 }
 

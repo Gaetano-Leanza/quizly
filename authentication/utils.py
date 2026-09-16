@@ -1,3 +1,8 @@
+"""
+URL routing configuration for basic user authentication endpoints 
+(register, login, and logout).
+"""
+
 from django.urls import path
 from .views import LogoutView, RegisterView, LoginView
 

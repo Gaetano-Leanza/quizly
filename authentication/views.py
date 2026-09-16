@@ -8,9 +8,17 @@ from .serializers import RegisterSerializer
 
 
 class RegisterView(APIView):
+    """
+    API view to handle new user registrations.
+    Allows unrestricted access (AllowAny) to create a new user account.
+    """
     permission_classes = [AllowAny]
 
     def post(self, request):
+        """
+        Validates the incoming registration data, creates the user, 
+        and returns a success message or validation errors.
+        """
         serializer = RegisterSerializer(data=request.data)
 
         if serializer.is_valid():
@@ -21,9 +29,17 @@ class RegisterView(APIView):
 
 
 class LoginView(APIView):
+    """
+    API view to authenticate users and issue JWT access and refresh tokens
+    stored securely inside HttpOnly cookies.
+    """
     permission_classes = [AllowAny]
 
     def post(self, request):
+        """
+        Validates username and password, generates tokens for the user,
+        sets them as HttpOnly cookies, and returns user details.
+        """
         username = request.data.get('username')
         password = request.data.get('password')
 
@@ -73,9 +89,17 @@ class LoginView(APIView):
 
 
 class CookieTokenRefreshView(APIView):
+    """
+    API view to refresh the JWT access token using the refresh token 
+stored inside the HttpOnly cookies.
+    """
     permission_classes = [AllowAny]
 
     def post(self, request):
+        """
+        Retrieves the refresh token from cookies, generates a new access token,
+        and sets it in a new HttpOnly cookie.
+        """
         refresh_token = request.COOKIES.get('refresh_token')
 
         if not refresh_token:
@@ -111,10 +135,17 @@ class CookieTokenRefreshView(APIView):
 
 
 class LogoutView(APIView):
+    """
+    API view to handle secure user logout by clearing the authentication cookies.
+    Requires the user to be authenticated.
+    """
 
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        """
+        Deletes the access and refresh token cookies from the client.
+        """
 
         response = Response(
             {"detail": "Log-Out successfully! All Tokens will be deleted. Refresh token is now invalid."},

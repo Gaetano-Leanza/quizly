@@ -1,3 +1,9 @@
+"""
+Utility functions for the Quizly AI pipeline.
+Handles YouTube audio downloading via yt-dlp, local transcription via Whisper AI,
+and structured quiz generation via Google Gemini Flash.
+"""
+
 import os
 import json
 import yt_dlp
@@ -6,15 +12,14 @@ import google.generativeai as genai
 from django.conf import settings
 from dotenv import load_dotenv
 
-# Lädt den API-Key aus deiner .env Datei
 load_dotenv()
 genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 
 
 def download_youtube_audio(youtube_url):
     """
-    Lädt ein YouTube-Video als mp3 herunter und speichert es temporär im media-Ordner.
-    Gibt den Dateipfad zur heruntergeladenen Datei zurück.
+    Downloads a YouTube video as an MP3 file and saves it temporarily in the media folder.
+    Returns the file path to the downloaded audio file.
     """
     output_path = os.path.join(
         settings.BASE_DIR, 'media', 'temp_audio.%(ext)s')
@@ -39,14 +44,14 @@ def download_youtube_audio(youtube_url):
 
             return mp3_filename
     except Exception as e:
-        print(f"Fehler beim Download: {e}")
+        print(f"Error during download: {e}")
         return None
 
 
 def transcribe_audio(file_path):
     """
-    Transkribiert eine Audio-Datei lokal mit OpenAI Whisper in Text.
-    Löscht die Datei anschließend, um Speicherplatz zu sparen.
+    Transcribes an audio file locally into text using OpenAI Whisper.
+    Deletes the file afterward to save storage space.
     """
     if not file_path or not os.path.exists(file_path):
         return None
@@ -59,7 +64,7 @@ def transcribe_audio(file_path):
         return result["text"]
 
     except Exception as e:
-        print(f"Fehler bei der Transkription: {e}")
+        print(f"Error during transcription: {e}")
         if os.path.exists(file_path):
             os.remove(file_path)
         return None
@@ -67,7 +72,7 @@ def transcribe_audio(file_path):
 
 def generate_quiz_from_text(transcribed_text):
     """
-    Nimmt den Text, sendet ihn an Gemini Flash und gibt ein strukturiertes Quiz zurück.
+    Takes the transcribed text, sends it to Gemini Flash, and returns a structured quiz.
     """
     if not transcribed_text:
         return None
@@ -75,20 +80,20 @@ def generate_quiz_from_text(transcribed_text):
     model = genai.GenerativeModel('gemini-3.6-flash')
 
     prompt = f"""
-    Erstelle basierend auf dem folgenden Text ein Quiz mit exakt 10 Fragen.
-    Jede Frage muss 4 Antwortmöglichkeiten haben, von denen genau eine richtig ist.
-    Gib das Ergebnis AUSSCHLIESSLICH als valides JSON-Array zurück. Keine Markdown-Formatierung, kein Begrüßungstext!
+    Based on the following text, create a quiz with exactly 10 questions.
+    Each question must have 4 answer options, with exactly one being correct.
+    Return the result EXCLUSIVELY as a valid JSON array. No markdown formatting, no introductory text!
     
-    Struktur-Beispiel:
+    Structure example:
     [
         {{
-            "question": "Wie heißt die Hauptstadt von Frankreich?",
-            "options": ["Berlin", "Madrid", "Paris", "Rom"],
+            "question": "What is the capital of France?",
+            "options": ["Berlin", "Madrid", "Paris", "Rome"],
             "correct_answer": "Paris"
         }}
     ]
     
-    Hier ist der zu analysierende Text:
+    Here is the text to analyze:
     {transcribed_text}
     """
 
@@ -100,5 +105,5 @@ def generate_quiz_from_text(transcribed_text):
         return quiz_data
 
     except Exception as e:
-        print(f"Fehler bei der KI-Generierung: {e}")
+        print(f"Error during AI generation: {e}")
         return None
