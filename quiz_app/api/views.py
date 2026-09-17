@@ -6,7 +6,7 @@ Provides CRUD operations and the automated AI quiz generation pipeline from YouT
 from rest_framework import viewsets, status, permissions
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .models import Quiz, Question, Answer
+from ..models import Quiz, Question, Answer
 from .serializers import QuizSerializer
 from .services import download_youtube_audio, transcribe_audio, generate_quiz_from_text
 

@@ -4,7 +4,7 @@ Handles the serialization of Quiz, Question, and Answer objects, including custo
 """
 
 from rest_framework import serializers
-from .models import Quiz, Question, Answer
+from ..models import Quiz, Question, Answer
 
 
 class QuestionSerializer(serializers.ModelSerializer):

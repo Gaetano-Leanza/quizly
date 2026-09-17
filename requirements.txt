@@ -9,7 +9,7 @@ djangorestframework-simplejwt>=5.3.0
 # Medienverarbeitung & KI
 yt-dlp>=2025.7.21
 openai-whisper
-google-genai
+google-generativeai
 
 # Umgebungsvariablen & Hilfsmittel
 python-dotenv>=1.0.0
