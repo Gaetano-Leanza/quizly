@@ -27,11 +27,11 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         if attrs['password'] != attrs['confirmed_password']:
             raise serializers.ValidationError(
-                {"password": "Die Passwörter stimmen nicht überein."})
+                {"password": "Passwords do not match."})
 
         if User.objects.filter(email=attrs['email']).exists():
             raise serializers.ValidationError(
-                {"email": "Diese E-Mail-Adresse wird bereits verwendet."})
+                {"email": "This email address is already in use."})
 
         return attrs
 

@@ -4,12 +4,14 @@ Provides CRUD operations and the automated AI quiz generation pipeline from YouT
 """
 
 import re
-from rest_framework import viewsets, status, permissions
-from rest_framework.response import Response
+
+from rest_framework import permissions, status, viewsets
 from rest_framework.permissions import IsAuthenticated
-from ..models import Quiz, Question, Answer
+from rest_framework.response import Response
+
+from ..models import Answer, Question, Quiz
 from .serializers import QuizSerializer
-from .services import download_youtube_audio, transcribe_audio, generate_quiz_from_text
+from .services import download_youtube_audio, generate_quiz_from_text, transcribe_audio
 
 
 class IsOwner(permissions.BasePermission):

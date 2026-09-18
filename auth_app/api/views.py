@@ -1,9 +1,10 @@
+from django.contrib.auth import authenticate
 from rest_framework import status
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth import authenticate
+
 from .serializers import RegisterSerializer
 
 
@@ -62,7 +63,6 @@ class LoginView(APIView):
 
             response = Response(response_data, status=status.HTTP_200_OK)
 
-            # 3. Cookies setzen
             response.set_cookie(
                 key='access_token',
                 value=access_token,
@@ -83,7 +83,7 @@ class LoginView(APIView):
             return response
         else:
             return Response(
-                {"detail": "Ungültige Anmeldedaten."},
+                {"detail": "Invalid login credentials."},
                 status=status.HTTP_401_UNAUTHORIZED
             )
 
@@ -104,7 +104,7 @@ stored inside the HttpOnly cookies.
 
         if not refresh_token:
             return Response(
-                {"detail": "Refresh Token fehlt."},
+                {"detail": "Refresh token missing."},
                 status=status.HTTP_401_UNAUTHORIZED
             )
 
@@ -129,7 +129,7 @@ stored inside the HttpOnly cookies.
 
         except Exception:
             return Response(
-                {"detail": "Refresh Token ungültig."},
+                {"detail": "Invalid refresh token."},
                 status=status.HTTP_401_UNAUTHORIZED
             )
 

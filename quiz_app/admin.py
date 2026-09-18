@@ -4,7 +4,8 @@ Registers Quiz, Question, and Answer models to make them manageable via the Djan
 """
 
 from django.contrib import admin
-from .models import Quiz, Question, Answer
+
+from .models import Answer, Question, Quiz
 
 admin.site.register(Quiz)
 admin.site.register(Question)

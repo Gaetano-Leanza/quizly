@@ -4,13 +4,15 @@ Handles YouTube audio downloading via yt-dlp, local transcription via Whisper AI
 and structured quiz generation via Google Gemini Flash.
 """
 
-import os
 import json
-import yt_dlp
-import whisper
+import os
+
 import google.generativeai as genai
-from django.conf import settings
+import whisper
+import yt_dlp
 from dotenv import load_dotenv
+
+from django.conf import settings
 
 load_dotenv()
 genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))

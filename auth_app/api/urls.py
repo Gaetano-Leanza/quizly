@@ -4,6 +4,7 @@ Maps URLs to their respective API views for registration, login, logout, and tok
 """
 
 from django.urls import path
+
 from .views import RegisterView, LoginView, LogoutView, CookieTokenRefreshView
 
 urlpatterns = [

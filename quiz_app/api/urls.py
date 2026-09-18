@@ -3,8 +3,9 @@ URL routing configuration for the quiz management endpoints.
 Uses a Django REST Framework DefaultRouter to automatically generate routes for the QuizViewSet.
 """
 
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
+
 from .views import QuizViewSet
 
 
