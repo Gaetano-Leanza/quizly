@@ -3,6 +3,7 @@ API views for managing quizzes.
 Provides CRUD operations and the automated AI quiz generation pipeline from YouTube videos.
 """
 
+import re
 from rest_framework import viewsets, status, permissions
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -52,20 +53,20 @@ class QuizViewSet(viewsets.ModelViewSet):
         if not youtube_url:
             return Response({"detail": "Invalid URL or request data."}, status=status.HTTP_400_BAD_REQUEST)
 
-      
+        match = re.search(r'(?:youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|\/shorts\/)([a-zA-Z0-9_-]{11})', youtube_url)
+        if match:
+            youtube_url = f"https://www.youtube.com/watch?v={match.group(1)}"
+
         quiz_data = self._process_quiz_pipeline(youtube_url)
         
-      
         if isinstance(quiz_data, Response):
             return quiz_data
 
-      
         try:
             quiz = self._save_quiz_data(request.user, youtube_url, quiz_data)
             serializer = self.get_serializer(quiz)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Exception:
-         
             return Response({"detail": "Internal server error during database save."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def _process_quiz_pipeline(self, youtube_url):
