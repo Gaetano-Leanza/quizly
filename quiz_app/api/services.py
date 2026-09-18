@@ -43,8 +43,7 @@ def download_youtube_audio(youtube_url):
             mp3_filename = filename.rsplit('.', 1)[0] + '.mp3'
 
             return mp3_filename
-    except Exception as e:
-        print(f"Error during download: {e}")
+    except Exception:
         return None
 
 
@@ -63,8 +62,7 @@ def transcribe_audio(file_path):
 
         return result["text"]
 
-    except Exception as e:
-        print(f"Error during transcription: {e}")
+    except Exception:
         if os.path.exists(file_path):
             os.remove(file_path)
         return None
@@ -104,6 +102,5 @@ def generate_quiz_from_text(transcribed_text):
         quiz_data = json.loads(clean_text)
         return quiz_data
 
-    except Exception as e:
-        print(f"Error during AI generation: {e}")
+    except Exception:
         return None

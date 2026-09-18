@@ -20,6 +20,11 @@ class Quiz(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        verbose_name = "Quiz"
+        verbose_name_plural = "Quizzes"
+        ordering = ['-created_at']
+
     def __str__(self):
         return f"{self.title} ({self.user.username})"
 
@@ -31,6 +36,10 @@ class Question(models.Model):
     quiz = models.ForeignKey(
         Quiz, on_delete=models.CASCADE, related_name='questions')
     text = models.CharField(max_length=500)
+
+    class Meta:
+        verbose_name = "Question"
+        verbose_name_plural = "Questions"
 
     def __str__(self):
         return self.text
@@ -45,6 +54,10 @@ class Answer(models.Model):
         Question, on_delete=models.CASCADE, related_name='answers')
     text = models.CharField(max_length=255)
     is_correct = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = "Answer"
+        verbose_name_plural = "Answers"
 
     def __str__(self):
         return self.text

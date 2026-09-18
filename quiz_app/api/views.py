@@ -44,51 +44,72 @@ class QuizViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         """
-        Handles the creation of a new quiz by downloading a YouTube video,
-        transcribing its audio, generating quiz questions via AI, and saving them.
+        Handles the creation of a new quiz. Delegates the heavy lifting 
+        to helper methods for processing and database saving.
         """
         youtube_url = request.data.get('url')
 
         if not youtube_url:
             return Response({"detail": "Invalid URL or request data."}, status=status.HTTP_400_BAD_REQUEST)
 
+      
+        quiz_data = self._process_quiz_pipeline(youtube_url)
+        
+      
+        if isinstance(quiz_data, Response):
+            return quiz_data
+
+      
+        try:
+            quiz = self._save_quiz_data(request.user, youtube_url, quiz_data)
+            serializer = self.get_serializer(quiz)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception:
+         
+            return Response({"detail": "Internal server error during database save."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def _process_quiz_pipeline(self, youtube_url):
+        """
+        Helper method to run the external AI pipeline.
+        Returns the quiz_data list or a 400 Response object on error.
+        """
         audio_path = download_youtube_audio(youtube_url)
         if not audio_path:
-            return Response({"detail": "Error downloading the video."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"detail": "Error downloading the video. Please check the URL."}, status=status.HTTP_400_BAD_REQUEST)
 
         transcribed_text = transcribe_audio(audio_path)
         if not transcribed_text:
-            return Response({"detail": "Error during audio transcription."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"detail": "Error during audio transcription."}, status=status.HTTP_400_BAD_REQUEST)
 
         quiz_data = generate_quiz_from_text(transcribed_text)
         if not quiz_data:
-            return Response({"detail": "Error during AI generation."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"detail": "Error during AI generation."}, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            quiz = Quiz.objects.create(
-                user=request.user,
-                title="Newly generated AI quiz",
-                description="Automatically generated quiz from YouTube video.",
-                video_url=youtube_url
+        return quiz_data
+
+    def _save_quiz_data(self, user, youtube_url, quiz_data):
+        """
+        Helper method to save the generated quiz, questions, and answers to the database.
+        """
+        quiz = Quiz.objects.create(
+            user=user,
+            title="Newly generated AI quiz",
+            description="Automatically generated quiz from YouTube video.",
+            video_url=youtube_url
+        )
+
+        for item in quiz_data:
+            question = Question.objects.create(
+                quiz=quiz,
+                text=item['question']
             )
 
-            for item in quiz_data:
-                question = Question.objects.create(
-                    quiz=quiz,
-                    text=item['question']
+            for option in item['options']:
+                is_correct = (option == item['correct_answer'])
+                Answer.objects.create(
+                    question=question,
+                    text=option,
+                    is_correct=is_correct
                 )
-
-                for option in item['options']:
-                    is_correct = (option == item['correct_answer'])
-                    Answer.objects.create(
-                        question=question,
-                        text=option,
-                        is_correct=is_correct
-                    )
-
-            serializer = self.get_serializer(quiz)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        except Exception as e:
-            print(f"Database error: {e}")
-            return Response({"detail": "Internal server error."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        return quiz
